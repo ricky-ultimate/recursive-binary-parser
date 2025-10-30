@@ -1,3 +1,18 @@
+#[allow(dead_code)]
+trait SplitAtChecked {
+    fn split_at_checked(&self, mid: usize) -> Option<(&str, &str)>;
+}
+
+impl SplitAtChecked for &str {
+    fn split_at_checked(&self, mid: usize) -> Option<(&str, &str)> {
+        if mid <= self.len() {
+            Some(self.split_at(mid))
+        } else {
+            None
+        }
+    }
+}
+
 fn parse_digit(c: char) -> bool {
     c == '0' || c == '1'
 }
@@ -16,21 +31,6 @@ fn parse_number(input: &str) -> bool {
     }
 
     false
-}
-
-#[allow(dead_code)]
-trait SplitAtChecked {
-    fn split_at_checked(&self, mid: usize) -> Option<(&str, &str)>;
-}
-
-impl SplitAtChecked for &str {
-    fn split_at_checked(&self, mid: usize) -> Option<(&str, &str)> {
-        if mid <= self.len() {
-            Some(self.split_at(mid))
-        } else {
-            None
-        }
-    }
 }
 
 fn main() {
