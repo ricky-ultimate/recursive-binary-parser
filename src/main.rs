@@ -5,6 +5,25 @@ enum BinaryNumber {
     Decimal { whole: String, fraction: String },
 }
 
+#[derive(Debug)]
+enum Operator {
+    Add,
+    Sub,
+    Mul,
+    Div,
+}
+
+#[allow(dead_code)]
+#[derive(Debug)]
+enum Expression {
+    Single(BinaryNumber),
+    Operation {
+        left: BinaryNumber,
+        op: Operator,
+        right: BinaryNumber,
+    },
+}
+
 #[allow(dead_code)]
 trait SplitAtChecked {
     fn split_at_checked(&self, mid: usize) -> Option<(&str, &str)>;
@@ -61,14 +80,49 @@ fn parse_binary(input: &str) -> Option<BinaryNumber> {
     }
 }
 
+fn parse_expression(input: &str) -> Option<Expression> {
+    for op_char in ['+', '-', '*', '/'] {
+        if let Some((left, right)) = input.split_once(op_char) {
+            let left = left.trim();
+            let right = right.trim();
+
+            let op = match op_char {
+                '+' => Operator::Add,
+                '-' => Operator::Sub,
+                '/' => Operator::Div,
+                '*' => Operator::Mul,
+                _ => unreachable!(),
+            };
+
+            if let (Some(lbin), Some(rbin)) = (parse_binary(left), parse_binary(right)) {
+                return Some(Expression::Operation {
+                    left: lbin,
+                    op,
+                    right: rbin,
+                });
+            } else {
+                return None;
+            }
+        }
+    }
+
+    parse_binary(input).map(Expression::Single)
+}
+
 fn main() {
     let tests = [
-        "0", "1", "01", "001", "1001", "102", "101.1", "10.02", "111.0001",
+        "101",
+        "101.1",
+        "10.01 + 1",
+        "10 * 11",
+        "111 - 10.1",
+        "101 / 2",
+        "10.1.1",
     ];
 
-    for t in tests {
-        match parse_binary(t) {
-            Some(num) => println!("{t}: valid -> {:?}", num),
+    for &t in &tests {
+        match parse_expression(t) {
+            Some(expr) => println!("{t}: valid -> {:#?}", expr),
             None => println!("{t}: invalid"),
         }
     }
